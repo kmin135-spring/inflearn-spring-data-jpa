@@ -19,7 +19,7 @@ class MemberJpaRepositoryTest {
 
     @Test
     void testMember() {
-        Member m = Member.of("memberA");
+        Member m = Member.of("memberA", 30);
         Member saved = mRepo.save(m);
 
         Member found = mRepo.findById(saved.getId());

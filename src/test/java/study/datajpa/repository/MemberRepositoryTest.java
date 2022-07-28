@@ -19,7 +19,7 @@ class MemberRepositoryTest {
 
     @Test
     void testMember() {
-        Member m = Member.of("memberA");
+        Member m = Member.of("memberA", 20);
         Member saved = mRepo.save(m);
         Member found = mRepo.findById(saved.getId()).get();
 
