@@ -70,4 +70,23 @@ class MemberJpaRepositoryTest {
         assertThat(members.get(0)).isEqualTo(m2);
     }
 
+    @Test
+    void paging() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 10));
+        mRepo.save(Member.of("mem3", 10));
+        mRepo.save(Member.of("mem4", 10));
+        mRepo.save(Member.of("mem5", 10));
+
+        //action
+        List<Member> members = mRepo.findByPage(10, 1, 3);
+        long totalCount = mRepo.totalCount(10);
+
+        // 페이지 계산... currentPage, first page, last page, ...
+
+        //assert
+        assertThat(members.size()).isEqualTo(3);
+        assertThat(totalCount).isEqualTo(5);
+    }
 }
