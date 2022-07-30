@@ -39,4 +39,8 @@ public class Member {
         this.team = team;
         team.getMembers().add(this);
     }
+
+    public void changeAge(int newAge) {
+        setAge(newAge);
+    }
 }
