@@ -69,4 +69,5 @@ class MemberJpaRepositoryTest {
         assertThat(members.size()).isEqualTo(1);
         assertThat(members.get(0)).isEqualTo(m2);
     }
+
 }

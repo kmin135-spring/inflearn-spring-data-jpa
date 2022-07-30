@@ -64,4 +64,16 @@ class MemberRepositoryTest {
         assertThat(members.get(0)).isEqualTo(m2);
     }
 
+    @Test
+    void testQuery() {
+        Member m1 = Member.of("member1", 10);
+        Member m2 = Member.of("member2", 20);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        List<Member> members = mRepo.findUser("member1", 10);
+
+        assertThat(members.size()).isEqualTo(1);
+        assertThat(members.get(0)).isEqualTo(m1);
+    }
 }
