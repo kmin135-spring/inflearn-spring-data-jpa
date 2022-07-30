@@ -8,6 +8,8 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,10 +21,34 @@ class MemberRepositoryTest {
 
     @Test
     void testMember() {
+        // 구현체 = class com.sun.proxy.$Proxy122
+        System.out.println("구현체 = " + mRepo.getClass());
         Member m = Member.of("memberA", 20);
         Member saved = mRepo.save(m);
         Member found = mRepo.findById(saved.getId()).get();
 
         assertThat(found).isEqualTo(saved);
+    }
+
+    @Test
+    void basicCRUD() {
+        Member m1 = Member.of("member1", 10);
+        Member m2 = Member.of("member2", 20);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        Member findM1 = mRepo.findById(m1.getId()).get();
+        Member findM2 = mRepo.findById(m2.getId()).get();
+        assertThat(findM1).isEqualTo(m1);
+        assertThat(findM2).isEqualTo(m2);
+
+        List<Member> all = mRepo.findAll();
+        assertThat(all.size()).isEqualTo(2);
+
+        mRepo.delete(m1);
+        mRepo.delete(m2);
+
+        long currentCnt = mRepo.count();
+        assertThat(currentCnt).isEqualTo(0L);
     }
 }
