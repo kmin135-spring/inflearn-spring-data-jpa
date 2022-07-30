@@ -51,4 +51,17 @@ class MemberRepositoryTest {
         long currentCnt = mRepo.count();
         assertThat(currentCnt).isEqualTo(0L);
     }
+
+    @Test
+    void findByUsernameAndAgeGreaterThan() {
+        Member m1 = Member.of("member", 10);
+        Member m2 = Member.of("member", 20);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        List<Member> members = mRepo.findByUsernameAndAgeGreaterThan("member", 15);
+        assertThat(members.size()).isEqualTo(1);
+        assertThat(members.get(0)).isEqualTo(m2);
+    }
+
 }
