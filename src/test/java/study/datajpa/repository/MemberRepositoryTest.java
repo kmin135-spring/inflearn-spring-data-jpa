@@ -12,6 +12,7 @@ import study.datajpa.entity.Team;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,5 +108,28 @@ class MemberRepositoryTest {
         List<Member> members = mRepo.findByNames(Arrays.asList("member1", "member2"));
 
         assertThat(members.size()).isEqualTo(2);
+    }
+
+    @Test
+    void returnType() {
+        Member m1 = Member.of("member1", 10);
+        Member m2 = Member.of("member2", 20);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        // list는 결과가 0개면 empty list 리턴 보장
+        List<Member> list = mRepo.findByUsername("member1");
+        // 이건 결과가 없으면 null
+        // 그냥 JPA 에서는 단건조회에서 없으면 NoResultException 발생하던것과 다름
+        // data-jpa 가 이 예외를 감싸서 null로 던지도록 처리한 것
+        Member one = mRepo.findOneByUsername("member1");
+        // 데이터가 없을 수 있다면 Optional을 쓰는게 맞다.
+        Optional<Member> option = mRepo.findOptionalByUsername("member1");
+
+        // 다만 Member든 Optional이든 2건 이상이 나오면 exception인건 공통통
+
+       assertThat(list.size()).isEqualTo(1);
+        assertThat(one).isEqualTo(m1);
+        assertThat(option.isPresent()).isEqualTo(true);
     }
 }
