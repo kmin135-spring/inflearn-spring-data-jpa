@@ -361,4 +361,56 @@ class MemberRepositoryTest {
         mRepo.findMemberEntityGraph();
         mRepo.findEntityGraphByUsername("member1");
     }
+
+    @Test
+    public void queryHint() {
+        // arrange
+        Member member1 = mRepo.save(Member.of("member1", 10));
+        em.flush();
+        em.clear();
+
+        // action
+
+        // 변경감지 (dirty check)
+        // 이를 위해 원본을 추가로 가지고 있어야하므로 추가 비용이 필요
+        Member findMember = mRepo.findById(member1.getId()).get();
+        findMember.changeName("newName");
+        em.flush();
+        em.clear();
+
+        // 100% 조회용으로 쓴다면 이런 기능이 필요없다
+        // findReadOnlyByUsername 는 readOnly로 JPA 힌트를 잡아놔서 변경감지가 발생하지 않음
+        Member otherFind = mRepo.findReadOnlyByUsername("newName");
+        otherFind.changeName("otherNewName");
+        em.flush();
+
+
+        // assert
+    }
+
+    @Test
+    public void lockTest() {
+        // arrange
+        // arrange
+        Member member1 = mRepo.save(Member.of("member1", 10));
+        em.flush();
+        em.clear();
+
+        // action
+        /*
+        select
+          member0_.member_id as member_i1_0_,
+          member0_.age as age2_0_,
+          member0_.team_id as team_id4_0_,
+          member0_.username as username3_0_
+        from
+          member member0_
+        where
+          member0_.username = 'member1'
+        for update
+         */
+        List<Member> member11 = mRepo.findLockByUsername("member1");
+
+        // assert
+    }
 }

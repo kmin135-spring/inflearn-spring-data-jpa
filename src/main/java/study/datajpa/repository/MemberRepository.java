@@ -4,14 +4,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -124,4 +123,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 자동생성 메서드에도 적용 가능
     @EntityGraph(attributePaths = {"team"})
     List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    /**
+     * 변경감지 등의 기능을 포기하는 대신 읽기 성능을 약간 향상시킬 수 있음
+     * 하지만 대부분의 경우 이 정도의 튜닝은 실질적으로 별 의미없는 경우가 많음
+     * 부하가 큰 일부 포인트에 적용을 검토할 수 있으나 실제 성능테스트로 의미있는 향상이 있는지 확인해야함
+     * 게다가 읽기 튜닝이 필요하면 redis 등의 캐시를 적용할 것이므로 더욱더 이런 튜닝이 필요한 상황은 적음
+    */
+    @QueryHints(value = @QueryHint(name="org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+    /**
+     * JPA가 제공하는 Lock 을 걸 수 있다.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 }

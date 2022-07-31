@@ -43,4 +43,8 @@ public class Member {
     public void changeAge(int newAge) {
         setAge(newAge);
     }
+
+    public void changeName(String newName) {
+        setUsername(newName);
+    }
 }
