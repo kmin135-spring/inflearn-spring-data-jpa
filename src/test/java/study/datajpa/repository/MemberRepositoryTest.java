@@ -281,4 +281,84 @@ class MemberRepositoryTest {
         // assert
         assertThat(affected).isEqualTo(3);
     }
+
+    @Test
+    public void findMemberLazy() {
+        // arrange
+        // member1 -> teamA
+        // member2 -> teamB
+        Team tA = Team.of("teamA");
+        Team tB = Team.of("teamB");
+        tRepo.save(tA);
+        tRepo.save(tB);
+        Member m1 = Member.of("member1", 10, tA);
+        Member m2 = Member.of("member2", 10, tB);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        em.flush();
+        em.clear();
+
+        // action
+        List<Member> all = mRepo.findAll();
+
+        // N+1 문제 발생!!
+        for (Member member : all) {
+            System.out.println("member = " + member);
+            // 프록시 클래스
+            System.out.println("member.teamClass = " + member.getTeam().getClass());
+            System.out.println("member.team = " + member.getTeam());
+        }
+
+        // assert
+    }
+
+    @Test
+    public void findMemberFetchJoin() {
+        // arrange
+        // member1 -> teamA
+        // member2 -> teamB
+        Team tA = Team.of("teamA");
+        Team tB = Team.of("teamB");
+        tRepo.save(tA);
+        tRepo.save(tB);
+        Member m1 = Member.of("member1", 10, tA);
+        Member m2 = Member.of("member2", 10, tB);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        em.flush();
+        em.clear();
+
+        // action
+        List<Member> all = mRepo.findMemberFetchJoin();
+
+        // N+1 문제 해결
+        for (Member member : all) {
+            System.out.println("member = " + member);
+            // 원본 엔티티 클래스
+            System.out.println("member.teamClass = " + member.getTeam().getClass());
+            System.out.println("member.team = " + member.getTeam());
+        }
+
+        // assert
+    }
+
+    @Test
+    void entityGraph() {
+        Team tA = Team.of("teamA");
+        Team tB = Team.of("teamB");
+        tRepo.save(tA);
+        tRepo.save(tB);
+        Member m1 = Member.of("member1", 10, tA);
+        Member m2 = Member.of("member2", 10, tB);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        em.flush();
+        em.clear();
+
+        mRepo.findMemberEntityGraph();
+        mRepo.findEntityGraphByUsername("member1");
+    }
 }

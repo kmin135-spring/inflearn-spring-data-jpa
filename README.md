@@ -35,3 +35,10 @@
 
 * JPQL DML 이든 mybatis, jdbcTemplate 이든 영속성 컨텍스트가 인식하지 못 하는 변경 작업을 같은 트랜잭션 내에서 섞어서 사용할 때는
   * 영속성 컨텍스트 초기화가 필요하지 않을지 세심히 검토해봐야함
+
+---
+
+* fetch join은 연관관계를 한 번에 조인해주는 JPA 기술
+* 간단한 fetch join일 때는 `@EntityGraph` 가 편하고
+* 좀 복잡하다 싶으면 그냥 JPQL로 직접 짜는걸 권장
+* NamedQuery와 비슷하게 NamedEntityGraph 도 있으니 필요하면 참고
