@@ -1,5 +1,9 @@
 package study.datajpa.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,4 +45,36 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByUsername(String username);
     Member findOneByUsername(String username);
     Optional<Member> findOptionalByUsername(String username);
+
+    /**
+     * 페이징
+     * 반환타입이 Page면 카운트 쿼리를 자동으로 날려준다.
+     * */
+    Page<Member> findByAge(int age, Pageable pageable);
+
+    /**
+     * 아래와 같이 드리븐 테이블만으로 카운트가 결정되는 쿼리일때도 (예제는 left join이고 where도 영향을 안 주니까)
+     * 기본 카운트 쿼리는 동일한 join 을 가져간다.
+     * 이에 따라 조인 구조나 데이터 양에 따라 카운트쿼리에 불필요한 부하가 걸릴 수 있다.
+     *
+     * 이 경우 카운트 결정에 필요한 최적화된 카운트 쿼리를 직접 명시할 수 있다.
+     * 성능이 문제되는 시점에 분리를 검토하자.
+     */
+    @Query(value = "select m from Member m left join m.team t",
+        countQuery = "select count(m) from Member m")
+    Page<Member> findCustomCountByAge(int age, Pageable pageable);
+
+    /**
+     * 슬라이싱
+     * 페이징과 달리 카운트 쿼리가 나가지않는다.
+     * 대신 원래 요청한 limit보다 +1 해서 요청한다.
+     * 주로 모바일용 페이지에서 전통적인 페이징 대신 "더 보기" 를 이용해서 추가 데이터를 불러올 때 유용하다.
+     *
+     * 카운트 쿼리가 없어서 전체페이지 등을 계산할 수 없으므로 해당 데이터는 제공하지 않는다.
+     *
+     */
+    Slice<Member> findSliceByAge(int age, PageRequest pageable);
+
+    /** limit, sort를 위해서만 PageRequest를 사용하고 반환은 리스트로 받아도 됨 */
+    List<Member> findListByAge(int age, PageRequest pageable);
 }

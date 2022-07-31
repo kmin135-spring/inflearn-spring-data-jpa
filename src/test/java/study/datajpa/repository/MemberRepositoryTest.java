@@ -4,6 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -131,5 +135,87 @@ class MemberRepositoryTest {
        assertThat(list.size()).isEqualTo(1);
         assertThat(one).isEqualTo(m1);
         assertThat(option.isPresent()).isEqualTo(true);
+    }
+
+    @Test
+    void paging() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 10));
+        mRepo.save(Member.of("mem3", 10));
+        mRepo.save(Member.of("mem4", 10));
+        mRepo.save(Member.of("mem5", 10));
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        //action
+        Page<Member> page = mRepo.findByAge(10, pageRequest);
+
+        /*
+        페이징에서도 당연히 Entity를 그대로 노출하지말고
+        아래와 같은 방법으로 DTO로 변환해서 반환하자
+         */
+        Page<MemberDto> dtoPage = page.map(m -> new MemberDto(m.getId(), m.getUsername(), null));
+
+        List<MemberDto> content = dtoPage.getContent();
+
+        //assert
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(dtoPage.getSize()).isEqualTo(3);
+        assertThat(dtoPage.getTotalElements()).isEqualTo(5);
+        assertThat(dtoPage.getTotalPages()).isEqualTo(2);
+        assertThat(dtoPage.isFirst()).isEqualTo(true);
+        assertThat(dtoPage.hasNext()).isEqualTo(true);
+        assertThat(dtoPage.hasPrevious()).isEqualTo(false);
+    }
+
+    @Test
+    void pagingCustomCount() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 10));
+        mRepo.save(Member.of("mem3", 10));
+        mRepo.save(Member.of("mem4", 10));
+        mRepo.save(Member.of("mem5", 10));
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        //action
+        Page<Member> page = mRepo.findCustomCountByAge(10, pageRequest);
+        Page<MemberDto> dtoPage = page.map(m -> new MemberDto(m.getId(), m.getUsername(), null));
+
+        List<MemberDto> content = dtoPage.getContent();
+
+        //assert
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(dtoPage.getSize()).isEqualTo(3);
+        assertThat(dtoPage.getTotalElements()).isEqualTo(5);
+        assertThat(dtoPage.getTotalPages()).isEqualTo(2);
+        assertThat(dtoPage.isFirst()).isEqualTo(true);
+        assertThat(dtoPage.hasNext()).isEqualTo(true);
+        assertThat(dtoPage.hasPrevious()).isEqualTo(false);
+    }
+
+    @Test
+    void slicing() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 10));
+        mRepo.save(Member.of("mem3", 10));
+        mRepo.save(Member.of("mem4", 10));
+        mRepo.save(Member.of("mem5", 10));
+
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        //action
+        Slice<Member> slicing = mRepo.findSliceByAge(10, pageRequest);
+        List<Member> content = slicing.getContent();
+
+        //assert
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(slicing.getSize()).isEqualTo(3);
+        assertThat(slicing.isFirst()).isEqualTo(true);
+        assertThat(slicing.hasNext()).isEqualTo(true);
+        assertThat(slicing.hasPrevious()).isEqualTo(false);
     }
 }
