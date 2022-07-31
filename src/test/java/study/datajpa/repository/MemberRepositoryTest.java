@@ -14,6 +14,7 @@ import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 import study.datajpa.entity.Team;
 
+import javax.persistence.EntityManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MemberRepositoryTest {
     @Autowired MemberRepository mRepo;
     @Autowired TeamRepository tRepo;
+    @Autowired EntityManager em;
 
     @Test
     void testMember() {
@@ -217,5 +219,66 @@ class MemberRepositoryTest {
         assertThat(slicing.isFirst()).isEqualTo(true);
         assertThat(slicing.hasNext()).isEqualTo(true);
         assertThat(slicing.hasPrevious()).isEqualTo(false);
+    }
+
+    @Test
+    void bulkAgePlus() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 19));
+        mRepo.save(Member.of("mem3", 20));
+        mRepo.save(Member.of("mem4", 21));
+        mRepo.save(Member.of("mem5", 40));
+
+        // action
+        // 참고로 JPQL이 나가기 전에 영속성 컨텍스트가 flush됨
+        int affected = mRepo.bulkAgePlus(20);
+
+        /*
+        bulk 연산 주의점
+        영속성 컨텍스트를 무시하고 DB에 바로 반영해버리므로
+        여전히 mem5의 age가 40으로 남아있다.
+
+        벌크 연산 후 무언가 추가작업이 있다면 영속성 컨텍스트 초기화가 필요하지 않을지 검토해야한다.
+         */
+        List<Member> result = mRepo.findByUsername("mem5");
+        Member member = result.get(0);
+        assertThat(member.getAge()).isEqualTo(40);
+
+        em.flush();
+        em.clear();
+
+        // 영속성 컨텍스트 초기화 후 다시 불러왔기 때문에 이제 41로 올바른 값이 조회됨
+        result = mRepo.findByUsername("mem5");
+        member = result.get(0);
+        assertThat(member.getAge()).isEqualTo(41);
+
+        // assert
+        assertThat(affected).isEqualTo(3);
+    }
+
+    @Test
+    void bulk2AgePlus() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 19));
+        mRepo.save(Member.of("mem3", 20));
+        mRepo.save(Member.of("mem4", 21));
+        mRepo.save(Member.of("mem5", 40));
+
+        // action
+        // 참고로 JPQL이 나가기 전에 영속성 컨텍스트가 flush됨
+        int affected = mRepo.bulk2AgePlus(20);
+
+        /*
+        bulk2AgePlus 는 옵션으로 수행 직후 영속성 컨텍스트를 초기화했으므로 바로 정상적인 값을 얻어옴
+         */
+        List<Member> result = mRepo.findByUsername("mem5");
+        Member member = result.get(0);
+        assertThat(member.getAge()).isEqualTo(41);
+
+
+        // assert
+        assertThat(affected).isEqualTo(3);
     }
 }

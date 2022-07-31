@@ -89,4 +89,20 @@ class MemberJpaRepositoryTest {
         assertThat(members.size()).isEqualTo(3);
         assertThat(totalCount).isEqualTo(5);
     }
+
+    @Test
+    void bulkAgePlus() {
+        // assign
+        mRepo.save(Member.of("mem1", 10));
+        mRepo.save(Member.of("mem2", 19));
+        mRepo.save(Member.of("mem3", 20));
+        mRepo.save(Member.of("mem4", 21));
+        mRepo.save(Member.of("mem5", 40));
+
+        // action
+        int affected = mRepo.bulkAgePlus(20);
+
+        // assert
+        assertThat(affected).isEqualTo(3);
+    }
 }

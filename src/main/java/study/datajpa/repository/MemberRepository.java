@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
@@ -39,12 +40,20 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("select m from Member m where m.username in :names")
     List<Member> findByNames(@Param("names") Collection<String> names);
 
+    /* ****************************************************************
+     * 반환타입
+     * ****************************************************************/
+
     /*
     반환 타입을 유연하게 사용할 수 있다
      */
     List<Member> findByUsername(String username);
     Member findOneByUsername(String username);
     Optional<Member> findOptionalByUsername(String username);
+
+    /* ****************************************************************
+     * 페이징
+     * ****************************************************************/
 
     /**
      * 페이징
@@ -77,4 +86,19 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     /** limit, sort를 위해서만 PageRequest를 사용하고 반환은 리스트로 받아도 됨 */
     List<Member> findListByAge(int age, PageRequest pageable);
+
+
+    /* ****************************************************************
+     * bulk update
+     * ****************************************************************/
+
+    /** Modifying 이 있어야 dml 쿼리가 나감 */
+    @Modifying
+    @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
+
+    /** 수행 후 영속성 컨텍스트 flush, clear 여부를 결정할 수 있음 */
+    @Modifying(clearAutomatically = true)
+    @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+    int bulk2AgePlus(@Param("age") int age);
 }
