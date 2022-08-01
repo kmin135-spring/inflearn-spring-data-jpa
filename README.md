@@ -73,6 +73,8 @@
 
 * 등록일, 등록자, 수정일, 수정자와 같은 공통 Auditing 기능은 실무에서도 많이 사용
 * 순수 JPA는 `@PrePersist, @PreUpdate, @PostPersist, @PostUpdate` 등을 사용
+* data-jpa는 `@CreatedDate, @LastModifiedDate` 와 같이 더 편리한 기능 제공
+  * `@EnableJpaAuditing, @EntityListeners(AuditingEntityListener.class)` 등의 차이점에 주의
 * 수정일, 수정자도 초기값을 null로 두지 말고 등록일, 등록자와 같은 값으로 하자
   * null이면 쿼리를 날릴 때 null인 경우를 고려해야하기 때문에 복잡성만 높아지기 때문
 * `@EntityListeners(AuditingEntityListener.class)` 는 `META-INF/orm.xml` 에 전체 적용하는 것도 가능함
