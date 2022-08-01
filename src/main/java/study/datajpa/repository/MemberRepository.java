@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     /*
     * 파라미터가 2개 이하 정도로 적을 때는 자동생성 방식도 유용함

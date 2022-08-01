@@ -413,4 +413,9 @@ class MemberRepositoryTest {
 
         // assert
     }
+
+    @Test
+    public void callCustom() {
+        List<Member> memberCustom = mRepo.findMemberCustom();
+    }
 }
