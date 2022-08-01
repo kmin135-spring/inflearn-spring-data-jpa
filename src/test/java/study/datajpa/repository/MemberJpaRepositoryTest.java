@@ -7,7 +7,9 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.entity.Member;
 
+import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MemberJpaRepositoryTest {
     @Autowired
     private MemberJpaRepository mRepo;
+    @Autowired
+    private EntityManager em;
 
     @Test
     void testMember() {
@@ -104,5 +108,20 @@ class MemberJpaRepositoryTest {
 
         // assert
         assertThat(affected).isEqualTo(3);
+    }
+
+    @Test
+    void jpaEventBaseEntity() throws InterruptedException {
+        Member member = Member.of("member1", 10);
+        mRepo.save(member); //@PrePersist
+
+        Thread.sleep(1000);
+        member.changeName("member2");
+
+        em.flush(); //@PreUpdate
+        em.clear();
+
+        Member findMember = mRepo.findById(member.getId()).get();
+        assertThat(findMember.getCreatedDate()).isBefore(findMember.getUpdatedDate());
     }
 }

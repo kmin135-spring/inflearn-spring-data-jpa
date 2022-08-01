@@ -12,7 +12,7 @@ import java.util.List;
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"id", "name"})
-public class Team {
+public class Team extends BaseTimeEntity { // extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "team_id")
@@ -26,5 +26,9 @@ public class Team {
         Team t = new Team();
         t.setName(name);
         return t;
+    }
+
+    public void changeName(String newName) {
+        name = newName;
     }
 }

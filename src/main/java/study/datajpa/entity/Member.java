@@ -1,6 +1,7 @@
 package study.datajpa.entity;
 
 import lombok.*;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import javax.persistence.*;
 
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode
 @ToString(of = {"id", "username", "age"})
-public class Member {
+public class Member extends JpaBaseEntity {
     @Id
     @GeneratedValue
     @Column(name = "member_id")
