@@ -1,6 +1,5 @@
 package study.datajpa.repository;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -417,5 +415,56 @@ class MemberRepositoryTest {
     @Test
     public void callCustom() {
         List<Member> memberCustom = mRepo.findMemberCustom();
+    }
+
+    @Test
+    public void projections() {
+        Team tA = Team.of("teamA");
+        tRepo.save(tA);
+        Member m1 = Member.of("m1", 10, tA);
+        Member m2 = Member.of("m2", 10, tA);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        em.flush();
+        em.clear();
+
+        /*
+        루트 엔티티에만 사용하면 아래 처럼 필드가 최적화되서 쿼리가 나감
+        select
+          member0_.username as col_0_0_,
+        from
+          member member0_
+        -- ...
+         */
+        List<UsernameOnlyDto> result = mRepo.findProjectionsByUsername("m1");
+        for(UsernameOnlyDto r : result) {
+            System.out.println(r.getUsername());
+        }
+
+        // 제네릭을 사용해 일반화하는 것도 가능
+        List<UsernameOnlyDto> result2 = mRepo.findProjectionsByUsername("m2", UsernameOnlyDto.class);
+        for(UsernameOnlyDto r : result2) {
+            System.out.println(r.getUsername());
+        }
+
+        /*
+        하지만 루트 엔티티를 넘어 조인이 발생하면 최적화가 안 됨 (team은 모든 필드를 얻음)
+
+        select
+          member0_.username as col_0_0_,
+          team1_.team_id as col_1_0_,
+          team1_.team_id as team_id1_1_,
+          team1_.created_date as created_2_1_,
+          team1_.last_modified_date as last_mod3_1_,
+          team1_.name as name4_1_
+        from
+          member member0_
+        -- ...
+         */
+        List<NestedClosedProjections> result3 = mRepo.findProjectionsByUsername("m1", NestedClosedProjections.class);
+        for(NestedClosedProjections r : result3) {
+            System.out.println("# Nested : " + r.getUsername() + " / " + r.getTeam() + " / " + r.getTeam().getName());
+        }
     }
 }
