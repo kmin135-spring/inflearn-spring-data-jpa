@@ -467,4 +467,28 @@ class MemberRepositoryTest {
             System.out.println("# Nested : " + r.getUsername() + " / " + r.getTeam() + " / " + r.getTeam().getName());
         }
     }
+
+    @Test
+    public void findByNativeQuery() {
+        // arrange
+        Team tA = Team.of("teamA");
+        tRepo.save(tA);
+        Member m1 = Member.of("m1", 10, tA);
+        Member m2 = Member.of("m2", 10, tA);
+        mRepo.save(m1);
+        mRepo.save(m2);
+
+        em.flush();
+        em.clear();
+        // action
+
+        Member m11 = mRepo.findByNativeQuery("m1");
+        System.out.println(m11);
+
+        Page<MemberProjection> page = mRepo.findByNativeProjection(PageRequest.of(0, 2));
+        for(MemberProjection mp : page.getContent()) {
+            System.out.println(mp.getUsername() + " / " + mp.getTeamName());
+        }
+        // assert
+    }
 }

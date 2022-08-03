@@ -94,3 +94,11 @@
   * 쉽게 말하면 select 문에서 조회하는 필드들 매핑
   * 이건 그래도 루트엔티티에만 쓸 때는 그럭저럭 쓸만하지만 조인을 하기 시작하면 최적화가 안 됨
 * 결론 : Specification, Example, Projections 모두 QueryDSL로 더 깔끔하게 처리가 가능함
+
+---
+
+* NativeQuery 는 반드시 필요한 상황이 아니면 쓰지말자
+* NativeQuery 는 제약이 많음 (반환 타입, 소팅, ...)
+* Projection 이 도입됨에 따라 그래도 DTO로 받기 편해졌고 Page, Pageable 도 사용 가능함
+  * 간단한 정적 쿼리에 한해서라면 쓸만할지도...? 
+* 이걸 써야할 상황이면 별도의 레포지토리를 만들어 jdbcTemplate, mybatis 등의 기술을 적용하자
